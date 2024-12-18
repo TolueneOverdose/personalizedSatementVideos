@@ -21,16 +21,7 @@ _Change='19.66'
 
 
 
-
-#
-#Adding the word 'Dear' to the template video
-#Adding the first line of the Name - 'Sandeep Kumar'
-#Adding the second line of the Name - 'Kushwaha'
-#	Note: Second line can be left blank if name can be occupied within one line
-#Adding Text 'Welcome to your monthly consolidated account statement' 
-#
-
- ffmpeg -i template.mp4 -filter_complex "[0:v] drawtext=alpha='if(lt(t,1),t,if(lt(t,6),1,if(lt(t,7),(1-(t-6)),0)))':text='Dear':fontcolor=black:fontfile='${_Fontpath}':fontsize=40:x='(w-text_w)/2':y=100[dearOut];[dearOut]drawtext=alpha='if(lt(t,1),(t),if(lt(t,6),1,if(lt(t,7),(1-(t-6)),0)))':text='${_Name_Line_1}':fontcolor=blue:fontfile='${_Fontpath}':fontsize=50:x=(w-text_w)/2:y=140[name1Out];[name1Out]drawtext=alpha='if(lt(t,1),t,if(lt(t,6),1,if(lt(t,7),(1-(t-6)),0)))':text='${_Name_Line_2}':fontcolor=blue:fontfile='${_Fontpath}':fontsize=50:x=(w-text_w)/2:y=195[name2Out];[name2Out]drawtext=alpha='if(lt(t,3),t-2,if(lt(t,6),1,if(lt(t,7),(1-(t-6)),0)))':text='Welcome to Your Monthly ':fontcolor=black:fontfile='${_Fontpath}':fontsize=35:x=(w-text_w)/2:y=260[text1Out];[text1Out]drawtext=alpha='if(lt(t,3),t-2,if(lt(t,6),1,if(lt(t,7),(1-(t-6)),0)))':text='Consolidated Account Statement ':fontcolor=black:fontfile='${_Fontpath}':fontsize=35:x=(w-text_w)/2:y=300[text2Out]" -map [text2Out] -y Intro1.mp4
+ffmpeg -i template.mp4 -filter_complex "[0:v] drawtext=alpha='if(lt(t,1),t,if(lt(t,6),1,if(lt(t,7),(1-(t-6)),0)))':text='Dear':fontcolor=black:fontfile='${_Fontpath}':fontsize=40:x='(w-text_w)/2':y=100[dearOut];[dearOut]drawtext=alpha='if(lt(t,1),(t),if(lt(t,6),1,if(lt(t,7),(1-(t-6)),0)))':text='${_Name_Line_1}':fontcolor=blue:fontfile='${_Fontpath}':fontsize=50:x=(w-text_w)/2:y=140[name1Out];[name1Out]drawtext=alpha='if(lt(t,1),t,if(lt(t,6),1,if(lt(t,7),(1-(t-6)),0)))':text='${_Name_Line_2}':fontcolor=blue:fontfile='${_Fontpath}':fontsize=50:x=(w-text_w)/2:y=195[name2Out];[name2Out]drawtext=alpha='if(lt(t,3),t-2,if(lt(t,6),1,if(lt(t,7),(1-(t-6)),0)))':text='Welcome to Your Monthly ':fontcolor=black:fontfile='${_Fontpath}':fontsize=35:x=(w-text_w)/2:y=260[text1Out];[text1Out]drawtext=alpha='if(lt(t,3),t-2,if(lt(t,6),1,if(lt(t,7),(1-(t-6)),0)))':text='Consolidated Account Statement ':fontcolor=black:fontfile='${_Fontpath}':fontsize=35:x=(w-text_w)/2:y=300[text2Out]" -map [text2Out] -y Intro1.mp4
 
 #
 #Adding Image of Ecas Logo
@@ -84,7 +75,7 @@ ffmpeg -i Summary.mp4 -filter_complex "[0:v] drawtext=alpha='if(lt(t,78),t-77,if
 
 #ecas image
 ffmpeg -i Final.mp4 -loop 1 -t 30 -i ecas.png -filter_complex "
-[1:v]format=rgba,fade=t=in:st=3:d=1,fade=t=out:st=6:d=1[red_image];[0:v][red_image]overlay=330:340:enable='between(t,5,7)'" -c:a copy ecas_video.mp4
+[1:v]format=rgba,fade=t=in:st=4:d=1,fade=t=out:st=6:d=1[red_image];[0:v][red_image]overlay=330:340:enable='between(t,4,7)'" -c:a copy ecas_video.mp4
 
 #EP
 ffmpeg -i ecas_video.mp4 -loop 1 -t 30 -i EP.png -filter_complex "
@@ -94,70 +85,68 @@ ffmpeg -i ecas_video.mp4 -loop 1 -t 30 -i EP.png -filter_complex "
 ffmpeg -i EP_img.mp4 -loop 1 -t 30 -i MF.png -filter_complex "
 [1:v]format=rgba,scale=440:60,fade=t=in:st=11:d=2:alpha=1,fade=t=out:st=14.7:d=1:alpha=1[red_image];[0:v][red_image]overlay=260:245:enable='between(t,11,16)'" -c:a copy MF_img.mp4
 
-#Portfolio_summary
-ffmpeg -i MF_img.mp4 -loop 1 -t 30 -i Portfolio_Summary.png -filter_complex "
-[1:v]scale=480:-1,fade=t=in:st=16:d=1:alpha=1,fade=t=out:st=23:d=1:alpha=1[red_image];
-[0:v][red_image]overlay=10:150:enable='between(t,16,24)'" -c:a copy portfolio_summary.mp4
 
-ffmpeg -i portfolio_summary.mp4 -filter_complex "
-scale=8000:-1, zoompan=z='if(between(in_time,17,20),pzoom+0.01,if(between(in_time,20,22),pzoom,pzoom-0.02))':x='(iw/2-(iw/zoom/2))/4':y='(ih/2-(ih/zoom/2))*1.2':d=1:s=1280x720:fps=25" -c:a copy -y portfolio_output.mp4
+# Create the JSON file with dynamic values
+cat << EOF > tts_request.json
+{
+  "input": {
+    "ssml": "<speak>
+   Dear
+   <lang xml:lang='en-IN'>${Name_Line_1} ${Name_Line_2}</lang>
+   <p>
+     Welcome to your monthly Consolidated Account Statement from CDSL.
+   </p>
+   <break time='1.5s'/>
+   Track all your assets in one statement like, Equity Portfolio, Physical Mutual Funds, and, National Pension Scheme
+   <break time='2s'/>
+   Your total portfolio value as of ${Date}, is, rupees <lang xml:lang='en-IN'>${Portfolio_Amt}</lang>.
+   <break time='4s'/>
+       Your Equity portfolio value as of ${Date}, is , rupees <lang xml:lang='en-IN'>${EP_Amt}</lang>.
+   <break time='5s'/>
+           Your Mutual Fund Value as of ${Date}, is , rupees <lang xml:lang='en-IN'>${MF_Amt}</lang>.
+   <break time='4s'/>
+           Your National Pension Scheme Value as of ${Date}, is, rupees <lang xml:lang='en-IN'>${NPS_Amt}</lang>.
+   <break time='5s'/>
+   Your portfolio value as of one month ago was rupees, <lang xml:lang='en-IN'>${Prev_Amt}</lang> <break time='1.5s'/>, an increase of ${Change} percent.
+   <break time='6s'/>
+   For more details on your transactions and holdings, please visit the link below.
+   <break time='1s'/>
+   We hope that this personalized video statement has been useful.
+   Visit www dot CDSL India dot com and login to your account to download your latest statements.
+</speak>"
+  },
+  "voice": {
+    "languageCode": "en-IN",
+    "name": "en-IN-Standard-C"
+  },
+  "audioConfig": {
+    "audioEncoding": "MP3"
+  }
+}
+EOF
 
-#bar_graph
-ffmpeg -i portfolio_output.mp4 -loop 1 -t 110 -i Bar_Graph.png -filter_complex "
-[1:v]scale=550:-1,fade=t=in:st=75:d=1:alpha=1,fade=t=out:st=89:d=1:alpha=1[red_image];
-[0:v][red_image]overlay=20:100:enable='between(t,74,91)'" -c:a copy bar_graphh.mp4
+# Call Google TTS API using the generated JSON file
+curl -X POST -H "Content-Type: application/json" \
+-H "X-Goog-User-Project: $(gcloud config list --format='value(core.project)')" \
+-H "Authorization: Bearer $(gcloud auth print-access-token)" \
+--data @tts_request.json \
+"https://texttospeech.googleapis.com/v1/text:synthesize" > response.json
 
-ffmpeg -i bar_graphh.mp4 -filter_complex "
-scale=8000:-1, zoompan=z='if(between(in_time,78,81),pzoom+0.01,if(between(in_time,81,85),pzoom,pzoom-0.02))':x='(iw/2-(iw/zoom/2))/4':y='(ih/2-(ih/zoom/2))*1.2':d=1:s=1280x720:fps=25" -c:a copy -y bar_graph_out.mp4
+# Check if the request was successful
+if [ $? -eq 0 ]; then
+    # Extract the audio content from the response
+    audio_content=$(jq -r '.audioContent' response.json)
+    
+    # Decode the audio content to an MP3 file
+    echo $audio_content | base64 --decode > output_file.mp3
 
-#pie_chart_1(Equity)
-ffmpeg -i bar_graph_out.mp4 -loop 1 -t 110 -i Pie_Chart.png -filter_complex "
-[1:v]scale=550:-1,fade=t=in:st=33:d=1:alpha=1,fade=t=out:st=42:d=1:alpha=1[red_image];
-[0:v][red_image]overlay=700:200:enable='between(t,32,43)'" -c:a copy pie_chart_1.mp4
+    echo "MP3 file created successfully as output_file.mp3"
+else
+    echo "Error in the TTS request"
+fi
 
-ffmpeg -i pie_chart_1.mp4 -filter_complex "
-scale=8000:-1,zoompan=z='if(between(in_time,33,36),pzoom+0.01,if(between(in_time,36,39),pzoom,pzoom-0.02))':x='(iw/2-(iw/zoom/2))*1.8':y='(ih/2-(ih/zoom/2))*1.2':d=1:s=1280x720:fps=25" -c:a copy -y pie_chart_1_out.mp4
+# Clean up the JSON request and response files
+rm tts_request.json response.json
 
-#pie_chart_2(MF)
-ffmpeg -i pie_chart_1_out.mp4 -loop 1 -t 110 -i Pie_Chart.png -filter_complex "
-[1:v]scale=550:-1,fade=t=in:st=46:d=1:alpha=1,fade=t=out:st=56:d=1:alpha=1[red_image];
-[0:v][red_image]overlay=670:200:enable='between(t,45,57)'" -c:a copy pie_chart_2.mp4
+ffmpeg -i MF_img.mp4 -i output_file.mp3 -i Background_Music.mp3 -filter_complex "[2:a]volume=0.1[a2];[1:a][a2]amerge=inputs=2[a];[a]afade=t=out:st=108:d=2[aout]" -map 0:v -map "[aout]" -c:v copy -c:a aac -ac 2 -shortest FinalAud.mp4
 
-ffmpeg -i pie_chart_2.mp4 -filter_complex "
-scale=8000:-1,zoompan=z='if(between(in_time,48,51),pzoom+0.01,if(between(in_time,51,54),pzoom,pzoom-0.02))':x='(iw/2-(iw/zoom/2))*1.8':y='(ih/2-(ih/zoom/2))*1.2':d=1:s=1280x720:fps=25" -c:a copy -y pie_chart_2_out.mp4
-
-#pie_chart_3(NPS)
-ffmpeg -i pie_chart_2_out.mp4 -loop 1 -t 110 -i Pie_Chart.png -filter_complex "
-[1:v]scale=550:-1,fade=t=in:st=62:d=1:alpha=1,fade=t=out:st=71:d=1:alpha=1[red_image];
-[0:v][red_image]overlay=670:200:enable='between(t,61,72)'" -c:a copy pie_chart_3.mp4
-
-ffmpeg -i pie_chart_3.mp4 -filter_complex "
-scale=8000:-1,zoompan=z='if(between(in_time,63,66),pzoom+0.01,if(between(in_time,66,69),pzoom,pzoom-0.02))':x='(iw/2-(iw/zoom/2))*1.8':y='(ih/2-(ih/zoom/2))*1.2':d=1:s=1280x720:fps=25" -c:a copy -y pie_chart_3_out.mp4
-
-
-aws polly synthesize-speech --output-format mp3 --engine standard --voice-id Raveena --text-type ssml --text "<speak>
-	Dear
-	<lang xml:lang='en-IN'>${_Name_Line_1} ${_Name_Line_2}</lang>
-	<p>
-  	  Welcome to your monthly Consolidated Account Statement from CDSL.
-	</p>
-	<break time='1.5s'/>
-	Track all your assets in one statement like, Equity Portfolio, Physical Mutual Funds, and, National Pension Scheme
-	<break time='2s'/>
-	Your total portfolio value as of ${_Date}, is, rupees <lang xml:lang='en-IN'>${_Portfolio_Amt}</lang>.
-	<break time='4s'/>
-        	Your Equity portfolio value as of ${_Date}, is , rupees <lang xml:lang='en-IN'>${_EP_Amt}</lang>.
-	<break time='5s'/>
-            	Your Mutual Fund Value as of ${_Date}, is , rupees <lang xml:lang='en-IN'>${_MF_Amt}</lang>.
-	<break time='4s'/>
-            	Your National Pension Scheme Value as of ${_Date}, is, rupees <lang xml:lang='en-IN'>${_NPS_Amt}</lang>.
-	<break time='5s'/>
-	Your portfolio value as of one month ago was rupees, <lang xml:lang='en-IN'>${_Prev_Amt}</lang> <break time='1.5s'/>, an increase of ${_Change} percent.
-	<break time='6s'/>
-	For more details on your transactions and holdings, please visit the link below.
-	<break time='1s'/>
-	We hope that this personalized video statement has been useful.
-	Visit www dot CDSL India dot com and login to your account to download your latest statements.
-</speak>" Polly_Audio.mp3 --region ap-south-1
-
-ffmpeg -i pie_chart_3_out.mp4 -i Polly_Audio.mp3 -i Background_Music.mp3 -filter_complex "[2:a]volume=0.1[a2];[1:a][a2]amerge=inputs=2[a];[a]afade=t=out:st=108:d=2[aout]" -map 0:v -map "[aout]" -c:v copy -c:a aac -ac 2 -shortest Final_With_Aud.mp4
